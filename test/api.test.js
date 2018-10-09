@@ -11,6 +11,7 @@ const APP_VERSION = process.env.TEST_APP_VERSION;
 describe('Order System Ingration Tests', () => {
   let endpoint;
   let customerId;
+  let addressId;
 
   before(function(done) {
     if (TEST_ENDPOINT === 'app') {
@@ -21,6 +22,9 @@ describe('Order System Ingration Tests', () => {
     done();
   });
 
+  //
+  // CreateCustomer
+  //
   it('CreateCustomer: should create a new customer', function(done) {
     request(endpoint)
       .post('/customers')
@@ -57,6 +61,9 @@ describe('Order System Ingration Tests', () => {
       });
   });
 
+  //
+  // GetCustomer
+  //
   it('GetCustomer: should retrieve same customer', function(done) {
     request(endpoint)
       .get(`/customers/${customerId}`)
@@ -88,6 +95,9 @@ describe('Order System Ingration Tests', () => {
       });
   });
 
+  //
+  // CreateCustomerAddress
+  //
   it('CreateCustomerAddress: should create a billing address for this customer', function(done) {
     request(endpoint)
       .post(`/customers/${customerId}/addresses`)
@@ -144,10 +154,31 @@ describe('Order System Ingration Tests', () => {
           mobile: '07523250462'
         });
         assert.lengthOf(res.body.created, 24);
+        addressId = res.body.address_id;
 
         done();
       });
-  })
+  });
+
+  //
+  // DeleteCustomerAddress
+  //
+  it('DeleteCustomerAddress: should delete the customer address', function(done) {
+    request(endpoint)
+      .delete(`/customers/${customerId}/addresses/${addressId}`)
+      .set('Accept', 'application/json')
+      .expect(204)
+      .end(function(err, res) {
+        if (err) {
+          console.error(res.text);
+          return done(err);
+        }
+
+        assert.isEmpty(res.body);
+        done();
+      });
+
+  });
 
   after(function(done) {
     done();
