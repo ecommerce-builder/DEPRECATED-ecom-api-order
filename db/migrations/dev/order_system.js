@@ -22,7 +22,7 @@ exports.up = function(knex, Promise) {
       .notNull()
       .index()
       .references('id').inTable('customers');
-    table.enu('type', ['billing', 'delivery']);
+    table.enu('type', ['billing', 'shipping']);
     table.string('contact_name', 255);
     table.string('address_line_1', 255);
     table.string('address_line_2', 255);
