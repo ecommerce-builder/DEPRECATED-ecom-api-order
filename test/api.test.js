@@ -1,6 +1,7 @@
 'use strict';
 const request = require('supertest');
 const chai = require('chai');
+chai.use(require('chai-uuid'));
 const assert = chai.assert;
 const App = require('../src/app');
 
@@ -161,6 +162,58 @@ describe('Order System Ingration Tests', () => {
   });
 
   //
+  // GetCustomerAddress
+  //
+  it('GetCustomerAddress: should retrieve customer address', function(done) {
+    request(endpoint)
+      .get(`/customers/${customerId}/addresses/${addressId}`)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /application\/json/)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          console.error(res.text);
+          return done(err);
+        }
+
+        assert.hasAllKeys(res.body, [
+          'address_id',
+          'customer_id',
+          'type',
+          'contact_name',
+          'address_line_1',
+          'address_line_2',
+          'city',
+          'state',
+          'zip',
+          'country',
+          'metadata',
+          'created',
+          'modified'
+        ]);
+
+        assert.uuid(res.body.address_id, 'v4');
+        assert.uuid(res.body.customer_id, 'v4');
+        assert.strictEqual(res.body.type, 'billing');
+        assert.strictEqual(res.body.contact_name, 'Johny Dellboy');
+        assert.strictEqual(res.body.address_line_1, '100 Timbuck Two');
+        assert.strictEqual(res.body.address_line_2, 'Strange Lane');
+        assert.strictEqual(res.body.city, 'Big City');
+        assert.strictEqual(res.body.state, 'Some state');
+        assert.strictEqual(res.body.zip, 'CB99 199');
+        assert.strictEqual(res.body.country, 'UK');
+        assert.isObject(res.body.metadata);
+        assert.deepEqual(res.body.metadata, {
+          mobile: '07523250462'
+        });
+        assert.lengthOf(res.body.created, 24);
+        assert.lengthOf(res.body.modified, 24);
+
+        done();
+      });
+  });
+
+  //
   // DeleteCustomerAddress
   //
   it('DeleteCustomerAddress: should delete the customer address', function(done) {
@@ -179,6 +232,8 @@ describe('Order System Ingration Tests', () => {
       });
 
   });
+
+
 
   after(function(done) {
     done();
